@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  PORTFOLIO — Single Page
+  ============================================================
+  Structure overview:
+    1. <head>     — fonts, CSS variables, all styles
+    2. <header>   — your name + job title
+    3. .video-wrap — the embedded video (center of the page)
+    4. <footer>   — nav links on the left, email on the right
+
+  To customise this page you'll mostly only need to edit:
+    - The <header> text (your name, title)
+    - The video embed inside .video-frame
+    - The .video-caption text beneath the video
+    - The <footer> links and email address
+    - The color variables at the top of <style> if you want
+      to change the palette
+
+  Fonts are loaded from Google Fonts (requires internet).
+  No JavaScript frameworks or build tools needed — this is
+  a plain HTML file you can open directly in any browser.
+  ============================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- viewport meta ensures the page scales correctly on phones -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <!-- Browser tab title — change "Alex Mercer" to your name -->
+  <title>Alexander Wayne Portfolio</title>
+
+  <!-- ── GOOGLE FONTS ──────────────────────────────────────
+    Two typefaces are loaded:
+      • Cormorant Garamond — a refined serif used for the name
+        and most display text. Loaded in weights 300 and 400,
+        both normal and italic.
+      • DM Mono — a geometric monospace used for labels, the
+        job title, captions, and footer links. Weight 300/400.
+
+    If you're hosting this offline or want to remove the
+    Google dependency, download the fonts from fonts.google.com
+    and use @font-face rules instead.
+  ──────────────────────────────────────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+  <style>
+
+    /* ── RESET ───────────────────────────────────────────────
+      Strips browser default margin/padding and switches all
+      elements to border-box sizing so padding doesn't add
+      unexpected width to elements.
+    ──────────────────────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── COLOR PALETTE ───────────────────────────────────────
+      All colors are defined here as CSS custom properties
+      (variables) so you can retheme the whole page by only
+      editing this block.
+
+        --ink       dark near-black, used for body text and
+                    the video background
+        --paper     warm off-white, used as the page background
+        --warm-mid  muted tan, used for secondary text and
+                    decorative rules
+        --accent    burnt orange-red, used sparingly for the
+                    "/" separator and hover states
+        --faint     very light warm grey, used for borders
+                    and the caption rule lines
+    ──────────────────────────────────────────────────────── */
+    :root {
+      --ink:      #1a1814;
+      --paper:    #ecf5ed;
+      --warm-mid: #a89f8c;
+      --accent:   #c8441b;
+      --faint:    #e2ddd4;
+    }
+
+    /* ── BODY LAYOUT ─────────────────────────────────────────
+      The body acts as a full-viewport flex column.
+      justify-content: space-between pushes the header to the
+      top, video to the middle, and footer to the bottom,
+      distributing the remaining space evenly between them.
+      This only works as intended if the content is shorter
+      than the viewport height — which it is on most screens.
+      On very small screens the page will scroll naturally.
+    ──────────────────────────────────────────────────────── */
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      /* Georgia is the fallback if Cormorant Garamond fails to load */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;        /* center everything horizontally */
+      justify-content: space-between; /* push sections apart vertically */
+      padding: 3.5rem 2rem 2.5rem;
+      /* more padding top than bottom — gives the header breathing room */
+    }
+
+
+    /* ════════════════════════════════════════════════════════
+       HEADER
+       ════════════════════════════════════════════════════════
+      Contains your name (.name) and job title (.title).
+      Starts invisible (opacity: 0) and fades + rises into
+      view via the 'rise' keyframe animation below.
+      The 0.1s delay means it plays almost immediately on load.
+    ──────────────────────────────────────────────────────── */
+    header {
+      text-align: center;
+      opacity: 0;
+      animation: rise 0.8s 0.1s ease forwards;
+      /* forwards means the element stays at opacity:1 after
+         the animation ends, rather than snapping back */
+    }
+
+    /* Your first name — rendered in the normal (upright) weight */
+    .name {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      /* clamp(min, preferred, max) — scales fluidly with the
+         viewport: never smaller than 2.2rem, never bigger than
+         3.8rem, ideally 5% of the viewport width */
+      font-weight: 300;           /* light weight for elegance */
+      letter-spacing: -0.01em;   /* slight tightening */
+      line-height: 1;
+    }
+
+    /* The <em> wrapping your last name switches it to italic,
+       creating a deliberate contrast within the name itself */
+    .name em {
+      font-style: italic;
+    }
+
+    /* Job title sits below the name in monospace caps */
+    .title {
+      margin-top: 0.5rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;     /* wide tracking is standard for
+                                    all-caps monospace labels here */
+      text-transform: uppercase;
+      color: var(--warm-mid);    /* muted — doesn't compete with the name */
+    }
+
+    /* The "/" separator between Writer and Production Assistant
+       is wrapped in a <span> so it can be colored separately */
+    .title span {
+      color: var(--accent);      /* burnt red accent */
+    }
+
+
+    /* ════════════════════════════════════════════════════════
+       VIDEO WRAPPER
+       ════════════════════════════════════════════════════════
+      .video-wrap constrains the total width and fades in
+      slightly after the header (0.35s delay).
+
+      .video-frame is the actual responsive video container.
+      It uses aspect-ratio: 16/9 to maintain the correct
+      proportions at any width — no fixed height needed.
+      The iframe or video tag is then absolutely positioned
+      to fill 100% of that container.
+    ──────────────────────────────────────────────────────── */
+    .video-wrap {
+      width: 100%;
+      max-width: 860px;    /* caps width on large screens */
+      opacity: 0;
+      animation: rise 0.9s 0.35s ease forwards;
+      /* slightly longer duration than header for a layered feel */
+    }
+
+    /* The responsive video container.
+       aspect-ratio keeps it 16:9 regardless of screen width.
+       overflow: hidden clips the corners of any iframe border. */
+    .video-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: var(--ink);  /* dark fill shows while video loads */
+      overflow: hidden;
+    }
+
+    /* Both <iframe> (YouTube/Vimeo) and <video> (self-hosted)
+       are absolutely positioned to fill the container.
+       This is the standard "intrinsic ratio" embed technique. */
+    .video-frame iframe,
+    .video-frame video {
+      position: absolute;
+      inset: 0;        /* shorthand for top:0; right:0; bottom:0; left:0 */
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ── VIDEO PLACEHOLDER ───────────────────────────────────
+      This is the dark panel shown before you add your video.
+      Once you paste in your iframe or <video> tag, delete
+      this entire .video-placeholder div from the HTML.
+    ──────────────────────────────────────────────────────── */
+    .video-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      background: #141210;   /* slightly darker than --ink for depth */
+      color: var(--warm-mid);
+    }
+
+    /* The decorative circle around the play triangle */
+    .play-icon {
+      width: 52px;
+      height: 52px;
+      border: 1.5px solid #3a3630;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* The SVG play triangle inside the circle.
+       margin-left: 3px nudges it right so it looks visually
+       centered (triangles appear left-heavy without this) */
+    .play-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--warm-mid);
+      margin-left: 3px;
+    }
+
+    /* "Paste your embed here" instructional label */
+    .placeholder-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    /* ── VIDEO CAPTION ───────────────────────────────────────
+      The small text below the video (e.g. "Selected Work · 2024").
+      The ::before and ::after pseudo-elements draw the
+      horizontal rule lines on either side of the text.
+      flex: 1 on both makes them each fill the available space.
+
+      To change the caption text, edit the <p class="video-caption">
+      element in the HTML below.
+    ──────────────────────────────────────────────────────── */
+    .video-caption {
+      margin-top: 0.9rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--warm-mid);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* Left and right rule lines flanking the caption text */
+    .video-caption::before,
+    .video-caption::after {
+      content: '';   /* required for pseudo-elements to render */
+      flex: 1;
+      height: 1px;
+      background: var(--faint);
+    }
+
+
+    /* ════════════════════════════════════════════════════════
+       FOOTER
+       ════════════════════════════════════════════════════════
+      Two columns: nav links on the left, email on the right.
+      flex-wrap: wrap means on narrow screens the email wraps
+      below the links rather than overflowing.
+      gap: 1rem provides spacing when wrapped.
+      Fades in last (0.6s delay) after header and video.
+    ──────────────────────────────────────────────────────── */
+    footer {
+      width: 100%;
+      max-width: 860px;   /* matches the video width */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 2rem;
+      border-top: 1px solid var(--faint);  /* subtle divider line */
+      opacity: 0;
+      animation: rise 0.8s 0.6s ease forwards;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    /* The nav links list (LinkedIn, IMDb, etc.) */
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;   /* removes default bullet points */
+      flex-wrap: wrap;
+    }
+
+    /* Individual footer nav links —
+       To add a link: copy one <li><a href="...">Label</a></li>
+       To remove a link: delete the whole <li>...</li>        */
+    .footer-links a {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--warm-mid);
+      text-decoration: none;   /* no underline by default */
+      transition: color 0.2s;  /* smooth color change on hover */
+    }
+
+    /* Darken links on hover to signal interactivity */
+    .footer-links a:hover {
+      color: var(--ink);
+    }
+
+    /* The email address on the right side of the footer.
+       To change it: update both the href="mailto:..." and
+       the visible text in the HTML below. */
+    .footer-contact a {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--faint);  /* subtle underline */
+      padding-bottom: 2px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    /* Accent color on hover for the email link */
+    .footer-contact a:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+
+    /* ── ENTRANCE ANIMATION ──────────────────────────────────
+      Used by header, video wrapper, and footer.
+      Each section starts invisible and 14px below its final
+      position, then fades in and rises to its natural place.
+      The staggered animation-delay values (0.1s, 0.35s, 0.6s)
+      make the three sections appear in sequence rather than
+      all at once.
+    ──────────────────────────────────────────────────────── */
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: none;  /* equivalent to translateY(0) */
+      }
+    }
+
+
+    /* ── MOBILE STYLES ───────────────────────────────────────
+      At 600px and below:
+        - Reduce body padding to give more horizontal space
+        - Center the footer so links and email stack neatly
+          in the middle rather than floating left/right
+    ──────────────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      body {
+        padding: 2.5rem 1.2rem 2rem;
+      }
+      footer {
+        justify-content: center;
+        text-align: center;
+      }
+      .footer-links {
+        justify-content: center;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════
+    HEADER
+    ══════════════════════════════════════════════════════
+    Update the two lines below with your own name and title.
+    The <em> tag around your last name renders it in italic —
+    keep it for the stylistic contrast, or remove it if you
+    prefer a uniform look.
+  ══════════════════════════════════════════════════════ -->
+  <header>
+    <!-- Your name. <em> italicises the last name. -->
+    <h1 class="name">Alexander <em>Wayne</em></h1>
+
+    <!-- Job title. The <span> colors the "/" separator in accent red. -->
+    <p class="title">Writer <span>/</span> Production Assistant <span>/</span> Film Maker</p>
+  </header>
+
+
+  <!-- ══════════════════════════════════════════════════════
+    VIDEO SECTION
+    ══════════════════════════════════════════════════════
+    This is the centerpiece of the page.
+
+    HOW TO ADD YOUR VIDEO
+    ─────────────────────
+    Delete the entire <div class="video-placeholder">...</div>
+    block and replace it with ONE of the following options:
+
+    ── Option A: YouTube ─────────────────────────────────
+    Find your video on YouTube.
+    Click Share → Embed and copy just the src URL, e.g.:
+      https://www.youtube.com/embed/dQw4w9WgXcQ
+
+    Then paste:
+      <iframe
+        src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+        allowfullscreen
+        allow="accelerometer; autoplay; clipboard-write;
+               encrypted-media; gyroscope; picture-in-picture">
+      </iframe>
+
+    ── Option B: Vimeo ───────────────────────────────────
+    On Vimeo, click Share → Embed and copy the src URL, e.g.:
+      https://player.vimeo.com/video/123456789
+
+    Then paste:
+      <iframe
+        src="https://player.vimeo.com/video/YOUR_VIDEO_ID"
+        allowfullscreen>
+      </iframe>
+
+    ── Option C: Self-hosted file ────────────────────────
+    If you have the video file on your own server or in the
+    same folder as this HTML file:
+
+      <video controls poster="thumbnail.jpg">
+        <source src="your-video.mp4" type="video/mp4">
+      </video>
+
+    "poster" is an optional thumbnail image shown before play.
+    Remove it if you don't have one.
+
+    ── Updating the caption ──────────────────────────────
+    Change the text inside <p class="video-caption"> to
+    describe your work, e.g. "Demo Reel · 2024" or just
+    the project title.
+  ══════════════════════════════════════════════════════ -->
+  <div class="video-wrap">
+    <div class="video-frame">
+
+<iframe
+  src="https://youtu.be/Evpc2u1cnhQ"
+  allowfullscreen
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+</iframe>
+
+    </div>
+
+    <!-- Caption below the video. Update this text. -->
+    <p class="video-caption">Selected Work · 2026 https://youtu.be/Evpc2u1cnhQ</p>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+    FOOTER
+    ══════════════════════════════════════════════════════
+    Left side: navigation links (LinkedIn, IMDb, etc.)
+    Right side: your email address
+
+    TO ADD A LINK: copy any <li><a href="...">Label</a></li>
+    and paste it inside the <ul class="footer-links">.
+
+    TO REMOVE A LINK: delete the whole <li>...</li> line.
+
+    TO UPDATE YOUR EMAIL: change both the href value
+    (mailto:you@example.com) and the visible text between
+    the <a> tags.
+  ══════════════════════════════════════════════════════ -->
+  <footer>
+
+    <!-- Navigation links — left side -->
+    <ul class="footer-links">
+      <li><a href="https://www.linkedin.com/in/alexander-prue-56a241202/">LinkedIn</a></li>         <!-- replace # with your LinkedIn URL -->
+      <li><a href="Super Duper Pilot - Alex Prue (1).pdf">Writing Samples</a></li>   <!-- replace # with a link to your writing -->
+      <li><a href="Resume,Alexander Prue.pdf">CV</a></li>                <!-- replace # with a link to your CV/resume PDF -->
+    </ul>
+
+    <!-- Email address — right side -->
+    <div class="footer-contact">
+      <!-- Update href="mailto:..." and the link text to your real email -->
+      <a href="mailto:alex@example.com">alexanderwayneprue@gmail.com</a>
+    </div>
+
+  </footer>
+
+</body>
+</html>
